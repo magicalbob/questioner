@@ -96,6 +96,9 @@ def main():
     project_path = args.path
     user_question = args.question
     file_structure = get_file_structure(project_path)
+    print("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
+    print(file_structure)
+    print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
 
     # Step 2: Construct the meta-question to ask ChatGPT
     meta_question = construct_meta_question(file_structure, user_question)
