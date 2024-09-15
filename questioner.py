@@ -3,6 +3,7 @@ import os
 import openai
 import argparse
 
+# Set your OpenAI API key from the environment variable
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
 def get_file_structure(project_path):
@@ -10,7 +11,12 @@ def get_file_structure(project_path):
     file_paths = []
     for root, dirs, files in os.walk(project_path):
         for file in files:
-            file_paths.append(os.path.join(root, file))
+            # Create relative paths for readability
+            rel_dir = os.path.relpath(root, project_path)
+            if rel_dir == ".":
+                rel_dir = ""
+            rel_file = os.path.join(rel_dir, file)
+            file_paths.append(rel_file)
     return file_paths
 
 def construct_meta_question(file_structure, user_question):
@@ -25,6 +31,7 @@ def construct_meta_question(file_structure, user_question):
 
 def ask_chatgpt(question):
     """Send the question to ChatGPT and return the response."""
+    print(f"Sending to ChatGPT: \n{question}\n{'='*40}")
     response = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
         messages=[
@@ -34,35 +41,26 @@ def ask_chatgpt(question):
     )
     return response.choices[0].message['content']
 
-def get_files_to_include(response, project_path):
-    """Extract file names from ChatGPT's response and return their paths."""
-    # List of files ChatGPT suggested
+def get_files_to_include(response, project_path, file_structure):
+    """Extract file names from ChatGPT's response and return their full paths."""
     suggested_files = []
-
-    # Extract file names from ChatGPT's response
     for line in response.split('\n'):
         line = line.strip()
-        if line.startswith('**') and '**' in line:  # e.g., **app.py**
-            # Extract the file name by stripping out ** markers
+        if line and not line.startswith('1.') and '**' in line:  # Look for file names like **app.py**
             file_name = line.strip('*').strip()
-            suggested_files.append(file_name)
+            # Try to match the suggested file names with the actual project files
+            matched_files = [file for file in file_structure if os.path.basename(file).lower() == file_name.lower()]
+            suggested_files.extend(matched_files)
+    return suggested_files
 
-    # Now match those file names to actual files in the project directory
-    file_list = []
-    for root, dirs, files in os.walk(project_path):
-        for file in files:
-            if file in suggested_files:
-                file_list.append(os.path.join(root, file))
-
-    return file_list
-
-def read_files(file_paths):
+def read_files(file_paths, project_path):
     """Read the contents of the files and return them as a dictionary."""
     file_contents = {}
     for file in file_paths:
-        if os.path.isfile(file):  # Ensure we're reading only files, not directories
+        full_path = os.path.join(project_path, file)
+        if os.path.isfile(full_path):  # Ensure we're reading only files, not directories
             try:
-                with open(file, 'r') as f:
+                with open(full_path, 'r') as f:
                     content = f.read()
                 file_contents[file] = content
             except Exception as e:
@@ -70,7 +68,6 @@ def read_files(file_paths):
         else:
             file_contents[file] = f"Error: {file} is not a file."
     return file_contents
-
 
 def construct_final_question(user_question, file_contents):
     """Construct the final question with the user's question and file contents."""
@@ -96,9 +93,6 @@ def main():
     project_path = args.path
     user_question = args.question
     file_structure = get_file_structure(project_path)
-    print("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
-    print(file_structure)
-    print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
 
     # Step 2: Construct the meta-question to ask ChatGPT
     meta_question = construct_meta_question(file_structure, user_question)
@@ -109,19 +103,18 @@ def main():
     print(f"ChatGPT suggests the following files:\n{meta_response}")
 
     # Step 4: Extract file names from ChatGPT's response and read their contents
-    files_to_include = get_files_to_include(meta_response, project_path)
+    files_to_include = get_files_to_include(meta_response, project_path, file_structure)
     if not files_to_include:
         print("ChatGPT did not suggest any valid files.")
         return
 
     print(f"Reading the following files: {files_to_include}")
-    file_contents = read_files([os.path.join(project_path, file) for file in files_to_include])
+    file_contents = read_files(files_to_include, project_path)
 
     # Step 5: Construct the final question with file contents
     final_question = construct_final_question(user_question, file_contents)
-    print("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
+    print("Constructed final question:")
     print(final_question)
-    print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
 
     # Step 6: Ask ChatGPT the final question with file contents
     print("Asking ChatGPT the final question...")
