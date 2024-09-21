@@ -62,8 +62,11 @@ def main():
     parser.add_argument('--question', required=True, help='The question you want answered')
     args = parser.parse_args()
 
+    # Get the absolute path of the current script
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+
     # Step 1: Run questioner.py to get the meta-question
-    questioner_command = ['python3', 'questioner.py', '-path', args.path, '-question', args.question]
+    questioner_command = ['python3', os.path.join(script_dir, 'questioner.py'), '-path', args.path, '-question', args.question]
     result = subprocess.run(questioner_command, capture_output=True, text=True)
     meta_question = result.stdout.strip()
 
@@ -98,7 +101,7 @@ def main():
         file_list = json.load(f)
 
     # Step 3: Run answer.py to construct the final prompt
-    answer_command = ['python3', 'answer.py', '--path', args.path, '--file-list', file_list_path, '--question', args.question]
+    answer_command = ['python3', os.path.join(script_dir, 'answer.py'), '--path', args.path, '--file-list', file_list_path, '--question', args.question]
     answer_result = subprocess.run(answer_command, capture_output=True, text=True)
     final_prompt = answer_result.stdout.strip()
 
