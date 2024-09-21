@@ -1,74 +1,90 @@
 #!/usr/bin/env python3
 import os
 import json
-import subprocess
-import tempfile
-import openai
 import argparse
+import subprocess
+import openai
+import tempfile
 
-def ask_chatgpt(question):
+# Function to ask ChatGPT and return the response
+def ask_chatgpt(prompt):
     openai.api_key = os.getenv("OPENAI_API_KEY")
-    actual_question = f"Considering the following project files and their contents:\n{question}\nPlease provide suggestions on how to make this project more modular. Include HTML tags for formatting."
+    response = None
     retries = 5
-    
     for i in range(retries):
         try:
             response = openai.ChatCompletion.create(
-                model="gpt-3.5-turbo",
+                model="gpt-3.5-turbo-0125",
                 messages=[
-                    {"role": "system", "content": "You are a helpful assistant with expertise in software architecture."},
-                    {"role": "user", "content": actual_question}
+                    {"role": "system", "content": "You are a helpful assistant."},
+                    {"role": "user", "content": prompt}
                 ],
             )
-            answer = response['choices'][0]['message']['content']
-            return answer
-        except Exception as e:
-            print(f"Error: {e}")
-            if isinstance(e, openai.error.RateLimitError) and i < retries - 1:
-                time.sleep(10)
+            return response.choices[0].message['content']
+        except openai.error.RateLimitError:
+            if i < retries - 1:
+                time.sleep(10)  # wait before retrying
             else:
-                return "API is overloaded, please try again later."
+                raise Exception("API is overloaded, please try again later.")
 
-def run_questioner(path, question):
-    """Run the questioner script and get the JSON output."""
-    result = subprocess.run(
-        ['python3', 'questioner.py', '-path', path, '-question', question],
-        capture_output=True,
-        text=True
-    )
-    return result.stdout
+def save_to_temp_file(content, increment):
+    """Save content to a temporary file with an incrementing number."""
+    temp_file_path = f'/tmp/all-together.prompt.{increment}'
+    with open(temp_file_path, 'w') as temp_file:
+        temp_file.write(content)
+    return temp_file_path
 
 def main():
-    parser = argparse.ArgumentParser(description="Integrate questioner and answer modules.")
+    parser = argparse.ArgumentParser(description="Run questioner and answer modules, and interact with ChatGPT.")
     parser.add_argument('--path', required=True, help='Path to the development project')
     parser.add_argument('--question', required=True, help='The question you want answered')
     args = parser.parse_args()
 
-    # Step 1: Run questioner.py and get the meta-question
-    meta_question = run_questioner(args.path, args.question)
+    # Step 1: Run questioner.py to get the meta-question
+    questioner_command = ['python3', 'questioner.py', '-path', args.path, '-question', args.question]
+    result = subprocess.run(questioner_command, capture_output=True, text=True)
+    meta_question = result.stdout.strip()
 
-    # Step 2: Ask ChatGPT the meta-question and get the JSON output
-    print("Asking ChatGPT...")
-    json_output = ask_chatgpt(meta_question)
-    
-    # Step 3: Save the output to a temporary JSON file
-    with tempfile.NamedTemporaryFile(delete=False, suffix='.json') as temp_file:
-        temp_file.write(json_output.encode('utf-8'))
-        temp_file_path = temp_file.name
+    # Save the meta-question to a temporary file
+    increment = 1
+    save_to_temp_file(meta_question, increment)
+    print(f"Meta-question saved to /tmp/all-together.prompt.{increment}")
 
-    # Step 4: Run answer.py with the path, question, and temp JSON file
-    answer_result = subprocess.run(
-        ['python3', 'answer.py', '--path', args.path, '--file-list', temp_file_path, '--question', args.question],
-        capture_output=True,
-        text=True
-    )
+    # Step 2: Submit the meta-question to ChatGPT
+    print("Asking ChatGPT for file list...")
+    file_list_json = ask_chatgpt(meta_question)
 
-    # Step 5: Get the final answer from ChatGPT
-    final_answer = ask_chatgpt(answer_result.stdout)
-    
+    # Save the response from ChatGPT (file list)
+    increment += 1
+    save_to_temp_file(file_list_json, increment)
+    print(f"File list response saved to /tmp/all-together.prompt.{increment}")
+
+    # Load the file list from JSON
+    file_list = json.loads(file_list_json)
+
+    # Step 3: Run answer.py to construct the final prompt
+    answer_command = ['python3', 'answer.py', '--path', args.path, '--file-list', f'/tmp/all-together.prompt.{increment}', '--question', args.question]
+    answer_result = subprocess.run(answer_command, capture_output=True, text=True)
+    final_prompt = answer_result.stdout.strip()
+
+    # Save the final prompt to a temporary file
+    increment += 1
+    save_to_temp_file(final_prompt, increment)
+    print(f"Final prompt saved to /tmp/all-together.prompt.{increment}")
+
+    # Step 4: Submit the final prompt to ChatGPT
+    print("Asking ChatGPT for the final answer...")
+    final_answer = ask_chatgpt(final_prompt)
+
+    # Save the final answer to a temporary file
+    increment += 1
+    save_to_temp_file(final_answer, increment)
+    print(f"Final answer response saved to /tmp/all-together.prompt.{increment}")
+
     # Output the final answer
     print("Final Answer from ChatGPT:")
     print(final_answer)
 
 if __name__ == "__main__":
     main()
+
