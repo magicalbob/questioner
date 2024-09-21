@@ -5,6 +5,7 @@ import argparse
 import subprocess
 import openai
 import tempfile
+import time
 
 # Function to ask ChatGPT and return the response
 def ask_chatgpt(prompt):
@@ -34,6 +35,14 @@ def save_to_temp_file(content, increment):
         temp_file.write(content)
     return temp_file_path
 
+def is_valid_json(json_str):
+    """Check if the given string is a valid JSON."""
+    try:
+        json.loads(json_str)
+        return True
+    except json.JSONDecodeError:
+        return False
+
 def main():
     parser = argparse.ArgumentParser(description="Run questioner and answer modules, and interact with ChatGPT.")
     parser.add_argument('--path', required=True, help='Path to the development project')
@@ -53,6 +62,11 @@ def main():
     # Step 2: Submit the meta-question to ChatGPT
     print("Asking ChatGPT for file list...")
     file_list_json = ask_chatgpt(meta_question)
+
+    # Validate the JSON response
+    if not is_valid_json(file_list_json):
+        print("Invalid JSON response. Resubmitting the meta-question...")
+        file_list_json = ask_chatgpt(meta_question)
 
     # Save the response from ChatGPT (file list)
     increment += 1
