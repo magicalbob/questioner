@@ -35,13 +35,26 @@ def save_to_temp_file(content, increment):
         temp_file.write(content)
     return temp_file_path
 
-def is_valid_json(json_str):
-    """Check if the given string is a valid JSON."""
-    try:
-        json.loads(json_str)
-        return True
-    except json.JSONDecodeError:
-        return False
+def validate_json(file_path):
+    """Validate JSON content from a file."""
+    with open(file_path, 'r') as f:
+        try:
+            json.load(f)  # Attempt to load the JSON
+            return True
+        except json.JSONDecodeError:
+            return False
+
+def clean_json_response(file_path):
+    """Remove code block markers from the JSON response."""
+    with open(file_path, 'r') as f:
+        lines = f.readlines()
+    
+    # Remove the first and last lines if they match the code block markers
+    if lines[0].startswith("```json") and lines[-1].strip() == "```":
+        lines = lines[1:-1]  # Remove first and last line
+
+    with open(file_path, 'w') as f:
+        f.writelines(lines)
 
 def main():
     parser = argparse.ArgumentParser(description="Run questioner and answer modules, and interact with ChatGPT.")
@@ -63,21 +76,29 @@ def main():
     print("Asking ChatGPT for file list...")
     file_list_json = ask_chatgpt(meta_question)
 
-    # Validate the JSON response
-    if not is_valid_json(file_list_json):
-        print("Invalid JSON response. Resubmitting the meta-question...")
-        file_list_json = ask_chatgpt(meta_question)
-
     # Save the response from ChatGPT (file list)
     increment += 1
-    save_to_temp_file(file_list_json, increment)
+    file_list_path = save_to_temp_file(file_list_json, increment)
     print(f"File list response saved to /tmp/all-together.prompt.{increment}")
 
+    # Clean the JSON response
+    clean_json_response(file_list_path)
+
+    # Validate the JSON file
+    if not validate_json(file_list_path):
+        print("Invalid JSON response, resubmitting the meta-question...")
+        file_list_json = ask_chatgpt(meta_question)
+        increment += 1
+        file_list_path = save_to_temp_file(file_list_json, increment)
+        print(f"File list response saved to /tmp/all-together.prompt.{increment}")
+        clean_json_response(file_list_path)
+
     # Load the file list from JSON
-    file_list = json.loads(file_list_json)
+    with open(file_list_path, 'r') as f:
+        file_list = json.load(f)
 
     # Step 3: Run answer.py to construct the final prompt
-    answer_command = ['python3', 'answer.py', '--path', args.path, '--file-list', f'/tmp/all-together.prompt.{increment}', '--question', args.question]
+    answer_command = ['python3', 'answer.py', '--path', args.path, '--file-list', file_list_path, '--question', args.question]
     answer_result = subprocess.run(answer_command, capture_output=True, text=True)
     final_prompt = answer_result.stdout.strip()
 
@@ -101,4 +122,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
