@@ -13,7 +13,7 @@ requirements_job:
     - sudo rm -rf /var/lib/dpkg/lock-frontend /var/lib/dpkg/lock /var/cache/debconf/*.dat /var/cache/apt/archives/lock
     - sudo dpkg --configure -a
     - sudo apt-get install -f
-    - sudo apt-get install -y python3-dev python3-pip
+    - sudo apt-get install -y python3-dev python3-pip libcairo2-dev
     - pip install -r requirements.txt
     - pip freeze
   variables:
