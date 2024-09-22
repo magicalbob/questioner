@@ -15,5 +15,6 @@ requirements_job:
     - sudo apt-get install -f
     - sudo apt-get install -y python3-dev python3-pip
     - pip install -r requirements.txt
+    - pip freeze
   variables:
     GIT_STRATEGY: clone
