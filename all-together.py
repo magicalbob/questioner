@@ -14,14 +14,14 @@ def ask_chatgpt(prompt):
     retries = 5
     for i in range(retries):
         try:
-            response = openai.ChatCompletion.create(
+            response = openai.chat.completions.create(
                 model="gpt-3.5-turbo-0125",
                 messages=[
                     {"role": "system", "content": "You are a helpful assistant."},
                     {"role": "user", "content": prompt}
                 ],
             )
-            return response.choices[0].message['content']
+            return response.choices[0].message.content
         except openai.error.RateLimitError:
             if i < retries - 1:
                 time.sleep(10)  # wait before retrying
