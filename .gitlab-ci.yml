@@ -1,0 +1,19 @@
+stages:
+ - requirements
+
+variables:
+  SONAR_SCANNER_VERSION: 5.0.1.3006
+
+requirements_job:
+  stage: requirements
+  tags:
+    - linux
+  script:
+    - sudo apt-get update
+    - sudo rm -rf /var/lib/dpkg/lock-frontend /var/lib/dpkg/lock /var/cache/debconf/*.dat /var/cache/apt/archives/lock
+    - sudo dpkg --configure -a
+    - sudo apt-get install -f
+    - sudo apt-get install -y python3-dev python3-pip
+    - pip install -r requirements.txt
+  variables:
+    GIT_STRATEGY: clone
