@@ -7,13 +7,14 @@ def construct_prompt(path, file_list, question):
     
     for file_dict in file_list:
         for file_name in file_dict.values():
-            file_path = os.path.join(path, file_name)
+            # construct file path by joining path to file_dict split at : with some character replacement  
+            file_path = (os.path.join(path, str(file_dict).split(":")[1])).replace(' ','').replace("'","").replace('}','')
             try:
                 with open(file_path, 'r') as f:
                     contents = f.read()
                 prompt_parts.append(f"{file_name}:\n{contents}")
             except FileNotFoundError:
-                prompt_parts.append(f"{file_name}: [File not found]")
+                prompt_parts.append(f"{file_name}: [File not found ({file_path})]")
     
     prompt_parts.append(f"I want to know: {question}")
     return "\n\n".join(prompt_parts)

@@ -98,10 +98,21 @@ def main():
 
     # Load the file list from JSON
     with open(file_list_path, 'r') as f:
-        file_list = json.load(f)
+        original_file_list = json.load(f)
+
+    # Transform to desired format
+    transformed_file_list = []
+    for index, file_dict in enumerate(original_file_list):
+        file_key = f"file{index + 1}"  # Creates keys like file1, file2, ...
+        transformed_file_list.append({file_key: list(file_dict.values())[0]})
+
+    # Save the transformed file list to a temporary file
+    increment += 1
+    transformed_file_list_path = save_to_temp_file(json.dumps(transformed_file_list), increment)
+    print(f"Transformed file list saved to /tmp/all-together.prompt.{increment}")
 
     # Step 3: Run answer.py to construct the final prompt
-    answer_command = ['python3', os.path.join(script_dir, 'answer.py'), '--path', args.path, '--file-list', file_list_path, '--question', args.question]
+    answer_command = ['python3', os.path.join(script_dir, 'answer.py'), '--path', args.path, '--file-list', transformed_file_list_path, '--question', args.question]
     answer_result = subprocess.run(answer_command, capture_output=True, text=True)
     final_prompt = answer_result.stdout.strip()
 
