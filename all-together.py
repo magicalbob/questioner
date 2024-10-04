@@ -22,8 +22,9 @@ def ask_chatgpt(prompt):
                 ],
             )
             return response.choices[0].message.content
-        except openai.error.RateLimitError:
+        except Exception as e: # openai.error.RateLimitError:
             if i < retries - 1:
+                print(f"DEBUG: {e}")
                 time.sleep(10)  # wait before retrying
             else:
                 raise Exception("API is overloaded, please try again later.")
