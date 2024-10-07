@@ -15,7 +15,7 @@ def ask_chatgpt(prompt):
     for i in range(retries):
         try:
             response = openai.chat.completions.create(
-                model="gpt-3.5-turbo-0125",
+                model="gpt-4o-mini",
                 messages=[
                     {"role": "system", "content": "You are a helpful assistant."},
                     {"role": "user", "content": prompt}
