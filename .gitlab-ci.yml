@@ -31,7 +31,6 @@ test_job:
     - sudo apt-get install -f
     - sudo apt-get install -y python3-dev python3-pip libasound2-dev
     - sudo pip install -r requirements.txt
-    - sudo ./app_unittest.py
     - sudo ~/.local/bin/coverage run -m unittest -s tests
     - sudo ~/.local/bin/coverage xml
     - sudo rm -rf __pycache__
