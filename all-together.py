@@ -67,7 +67,7 @@ def main():
     script_dir = os.path.dirname(os.path.abspath(__file__))
 
     # Step 1: Run questioner.py to get the meta-question
-    questioner_command = ['python3', os.path.join(script_dir, 'questioner.py'), '-path', args.path, '-question', args.question]
+    questioner_command = ['python3', os.path.join(script_dir, 'questioner.py'), '--path', args.path, '--question', args.question]
     result = subprocess.run(questioner_command, capture_output=True, text=True)
     meta_question = result.stdout.strip()
 
