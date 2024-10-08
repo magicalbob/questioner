@@ -31,8 +31,8 @@ def construct_meta_question(file_structure, user_question):
 def main():
     # Set up argument parser
     parser = argparse.ArgumentParser(description="Generate a meta-question about a development project.")
-    parser.add_argument('-path', required=True, help="Path to the development project")
-    parser.add_argument('-question', required=True, help="The question you want answered")
+    parser.add_argument('--path', required=True, help="Path to the development project")
+    parser.add_argument('--question', required=True, help="The question you want answered")
     args = parser.parse_args()
 
     # Step 1: Get the project file structure
