@@ -34,7 +34,7 @@ test_job:
       #    - sudo ~/.local/bin/coverage run -m unittest -s tests
       #    - sudo ~/.local/bin/coverage xml
       #    - sudo rm -rf __pycache__
-    - ls -l ~/.local
+    - ls -l ~/.local/bin
   artifacts:
     paths:
       - coverage.xml
