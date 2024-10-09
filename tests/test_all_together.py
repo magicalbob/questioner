@@ -4,9 +4,9 @@ import alltogether
 
 class TestAllTogether(unittest.TestCase):
 
-    @patch('all_together.os.getenv')
-    @patch('all_together.subprocess.run')
-    @patch('all_together.ask_chatgpt')
+    @patch('alltogether.os.getenv')
+    @patch('alltogether.subprocess.run')
+    @patch('alltogether.ask_chatgpt')
     def test_main_flow(self, mock_ask_chatgpt, mock_subprocess, mock_getenv):
         # Mock return values
         mock_getenv.return_value = "fake_api_key"
@@ -18,7 +18,7 @@ class TestAllTogether(unittest.TestCase):
         ]
 
         # Run the main function
-        all_together.main()
+        alltogether.main()
 
         # Assertions
         mock_subprocess.assert_called()  # Ensure subprocess was called
