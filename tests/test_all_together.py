@@ -1,6 +1,6 @@
 import unittest
 from unittest.mock import patch, MagicMock
-import all_together
+import alltogether
 
 class TestAllTogether(unittest.TestCase):
 
