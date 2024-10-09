@@ -19,6 +19,7 @@ class TestQuestioner(unittest.TestCase):
         os.rmdir(test_dir)
 
     def test_construct_meta_question(self):
+        self.maxDiff = None
         file_structure = ['file1.txt', 'file2.txt']
         user_question = "What does this project do?"
         expected_question = (

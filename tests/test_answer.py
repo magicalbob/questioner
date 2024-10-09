@@ -1,12 +1,14 @@
 import unittest
 import os
-import json
+import tempfile
+import shutil
 from answer import construct_prompt
 
 class TestAnswer(unittest.TestCase):
 
     def setUp(self):
-        self.test_path = '/fake/path'
+        # Create a temporary directory
+        self.test_path = tempfile.mkdtemp()
         self.test_files = [
             {'file1': 'test_file1.txt'},
             {'file2': 'test_file2.txt'}
@@ -18,11 +20,8 @@ class TestAnswer(unittest.TestCase):
             f.write("Content of test file 2")
 
     def tearDown(self):
-        # Clean up the test files
-        if os.path.exists(os.path.join(self.test_path, 'test_file1.txt')):
-            os.remove(os.path.join(self.test_path, 'test_file1.txt'))
-        if os.path.exists(os.path.join(self.test_path, 'test_file2.txt')):
-            os.remove(os.path.join(self.test_path, 'test_file2.txt'))
+        # Clean up the temporary directory
+        shutil.rmtree(self.test_path)
 
     def test_construct_prompt(self):
         question = "What does this project do?"
@@ -37,3 +36,4 @@ class TestAnswer(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+

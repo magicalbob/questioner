@@ -1,5 +1,6 @@
 import unittest
 from unittest.mock import patch, MagicMock
+import sys
 import alltogether
 
 class TestAllTogether(unittest.TestCase):
@@ -7,6 +8,7 @@ class TestAllTogether(unittest.TestCase):
     @patch('alltogether.os.getenv')
     @patch('alltogether.subprocess.run')
     @patch('alltogether.ask_chatgpt')
+    @patch('sys.argv', ['alltogether.py', '--path', 'fake_path', '--question', 'fake_question'])  # Mock sys.argv
     def test_main_flow(self, mock_ask_chatgpt, mock_subprocess, mock_getenv):
         # Mock return values
         mock_getenv.return_value = "fake_api_key"
@@ -23,9 +25,6 @@ class TestAllTogether(unittest.TestCase):
         # Assertions
         mock_subprocess.assert_called()  # Ensure subprocess was called
         self.assertEqual(mock_ask_chatgpt.call_count, 3)  # Ensure the correct number of calls to ask_chatgpt
-       
-    # Additional tests for specific functions can go here
-    # e.g., test_save_to_temp_file, test_validate_json, etc.
 
 if __name__ == '__main__':
     unittest.main()
