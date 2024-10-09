@@ -30,13 +30,14 @@ test_job:
     - sudo dpkg --configure -a
     - sudo apt-get install -f
     - sudo apt-get install -y python3-dev python3-pip libasound2-dev
-    - sudo pip install -r requirements.txt
-    - sudo ~/.local/bin/coverage run -m unittest discover -s tests
-    - sudo ~/.local/bin/coverage report
-    - sudo ~/.local/bin/coverage xml
-    - sudo rm -rf __pycache__
+    - pip install -r requirements.txt
+    - python3 -m unittest discover 'tests'
+    - ~/.local/bin/coverage run -m unittest discover tests
+    - ~/.local/bin/coverage xml
+    - rm -rf __pycache__
+  variables:
+    GIT_STRATEGY: clone
+    PYTHONPATH: "${PYTHONPATH}:${CI_PROJECT_DIR}"  # Add project root to Python path
   artifacts:
     paths:
       - coverage.xml
-  variables:
-    GIT_STRATEGY: clone
