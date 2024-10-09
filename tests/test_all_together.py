@@ -14,9 +14,9 @@ class TestAllTogether(unittest.TestCase):
         mock_getenv.return_value = "fake_api_key"
         mock_subprocess.return_value.stdout = "meta-question"
         mock_ask_chatgpt.side_effect = [
-            '{"file1": "file1.txt", "file2": "file2.txt"}',  # First call
-            '{"file1": "file1.txt", "file2": "file2.txt"}',  # Second call
-            'Final Answer from ChatGPT'  # Final answer
+            [{"file1": "file1.txt", "file2": "file2.txt"}],  # First call should return a list of dicts
+            [{"file1": "file1.txt", "file2": "file2.txt"}],  # Second call
+            "Final Answer from ChatGPT"  # Final answer can remain a string
         ]
 
         # Run the main function
