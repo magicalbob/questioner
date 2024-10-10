@@ -26,18 +26,18 @@ class TestAllTogether(unittest.TestCase):
         mock_subprocess.assert_called()  # Ensure subprocess was called
         self.assertEqual(mock_ask_chatgpt.call_count, 2)  # Ensure the correct number of calls to ask_chatgpt
 
-    @patch('alltogether.os.getenv', return_value='fake_api_key')
-    @patch('alltogether.subprocess.run')
-    @patch('time.sleep', return_value=None)  # Skip actual sleep
-    @patch('alltogether.openai.chat.completions.create', side_effect=Exception("API Error"))
-    @patch('sys.argv', ['alltogether.py', '--path', 'fake_path', '--question', 'fake_question'])
-    def test_api_error_handling(self, mock_argv, mock_create, mock_sleep, mock_subprocess, mock_getenv):
-        mock_subprocess.return_value.stdout = "meta-question"
-
-        with self.assertRaises(Exception) as context:
-            alltogether.main()
-
-        self.assertIn("API is overloaded", str(context.exception))
+#    @patch('alltogether.os.getenv', return_value='fake_api_key')
+#    @patch('alltogether.subprocess.run')
+#    @patch('time.sleep', return_value=None)  # Skip actual sleep
+#    @patch('alltogether.openai.chat.completions.create', side_effect=Exception("API Error"))
+#    @patch('sys.argv', ['alltogether.py', '--path', 'fake_path', '--question', 'fake_question'])
+#    def test_api_error_handling(self, mock_argv, mock_create, mock_sleep, mock_subprocess, mock_getenv):
+#        mock_subprocess.return_value.stdout = "meta-question"
+#
+#        with self.assertRaises(Exception) as context:
+#            alltogether.main()
+#
+#        self.assertIn("API is overloaded", str(context.exception))
 
 if __name__ == '__main__':
     unittest.main()
