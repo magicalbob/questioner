@@ -18,12 +18,11 @@ def get_file_structure(project_path):
     return file_paths
 
 def construct_meta_question(file_structure, user_question):
-    """Construct the 'question about a question' to ask ChatGPT."""
     file_list_str = '\n'.join(file_structure)
     meta_question = (
         f"I have the following project structure:\n\n{file_list_str}\n\n"
         f"The user wants to know: '{user_question}'. "
-        f"Which files from the project do you need to look at to answer the user's question?"
+        f"Which files from the project do you need to look at to answer the user's question? "
         "Please answer in JSON like this [{'file1': 'name_of_file1'}, {'file2': 'name_of_file2'} ... {'fileN': 'name_of_fileN'}]. It is important that keys always start with file."
     )
     return meta_question
