@@ -24,6 +24,8 @@ test_job:
   tags:
     - linux
   script:
+    - python3 -m venv /tmp/venv
+    - source /tmp/venv/bin/activate
     - pip install -r requirements.txt
     - python3 -m unittest discover 'tests'
     - ~/.local/bin/coverage run -m unittest discover tests
