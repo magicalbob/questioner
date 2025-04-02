@@ -1,39 +1,36 @@
 stages:
  - requirements
  - tests
+ - scan
 
 variables:
   SONAR_SCANNER_VERSION: 5.0.1.3006
 
 requirements_job:
+  image: docker.ellisbs.co.uk:5190/ubuntu:24.04
   stage: requirements
   tags:
     - linux
   script:
-    - sudo apt-get update
-    - sudo rm -rf /var/lib/dpkg/lock-frontend /var/lib/dpkg/lock /var/cache/debconf/*.dat /var/cache/apt/archives/lock
-    - sudo dpkg --configure -a
-    - sudo apt-get install -f
-    - sudo apt-get install -y python3-dev python3-pip libcairo2-dev
+    - python3 -m venv /tmp/venv
+    - source /tmp/venv/bin/activate
     - pip install -r requirements.txt
     - pip freeze
   variables:
     GIT_STRATEGY: clone
 
 test_job:
+  image: docker.ellisbs.co.uk:5190/ubuntu:24.04
   stage: tests
   tags:
     - linux
   script:
-    - sudo apt-get update
-    - sudo rm -rf /var/lib/dpkg/lock-frontend /var/lib/dpkg/lock /var/cache/debconf/*.dat /var/cache/apt/archives/lock
-    - sudo dpkg --configure -a
-    - sudo apt-get install -f
-    - sudo apt-get install -y python3-dev python3-pip libasound2-dev
+    - python3 -m venv /tmp/venv
+    - source /tmp/venv/bin/activate
     - pip install -r requirements.txt
     - python3 -m unittest discover 'tests'
-    - ~/.local/bin/coverage run -m unittest discover tests
-    - ~/.local/bin/coverage xml
+    - coverage run -m unittest discover tests
+    - coverage xml
     - rm -rf __pycache__
   variables:
     GIT_STRATEGY: clone
@@ -41,3 +38,22 @@ test_job:
   artifacts:
     paths:
       - coverage.xml
+
+scan_job:
+  image: docker.ellisbs.co.uk:5190/ubuntu:24.04
+  stage: scan
+  tags:
+    - linux
+  script:
+    - pushd ~
+    - curl -o /tmp/sonar-scanner.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-${SONAR_SCANNER_VERSION}.zip
+    - unzip -n /tmp/sonar-scanner.zip
+    - popd
+    - ~/sonar-scanner-${SONAR_SCANNER_VERSION}/bin/sonar-scanner -Dsonar.token=$SONAR_TOKEN
+  dependencies:
+    - test_job
+  artifacts:
+    paths:
+      - coverage.xml
+  variables:
+    GIT_STRATEGY: clone
