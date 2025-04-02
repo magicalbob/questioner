@@ -1,6 +1,7 @@
 stages:
  - requirements
  - tests
+ - scan
 
 variables:
   SONAR_SCANNER_VERSION: 5.0.1.3006
