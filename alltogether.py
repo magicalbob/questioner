@@ -15,15 +15,16 @@ def ask_chatgpt(prompt):
     for i in range(retries):
         try:
             response = openai.chat.completions.create(
-                model="gpt-3.5-turbo-0125",
+                model="gpt-4o-mini",
                 messages=[
                     {"role": "system", "content": "You are a helpful assistant."},
                     {"role": "user", "content": prompt}
                 ],
             )
             return response.choices[0].message.content
-        except openai.error.RateLimitError:
+        except Exception as e: # openai.error.RateLimitError:
             if i < retries - 1:
+                print(f"DEBUG: {e}")
                 time.sleep(10)  # wait before retrying
             else:
                 raise Exception("API is overloaded, please try again later.")
@@ -66,7 +67,7 @@ def main():
     script_dir = os.path.dirname(os.path.abspath(__file__))
 
     # Step 1: Run questioner.py to get the meta-question
-    questioner_command = ['python3', os.path.join(script_dir, 'questioner.py'), '-path', args.path, '-question', args.question]
+    questioner_command = ['python3', os.path.join(script_dir, 'questioner.py'), '--path', args.path, '--question', args.question]
     result = subprocess.run(questioner_command, capture_output=True, text=True)
     meta_question = result.stdout.strip()
 
