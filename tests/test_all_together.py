@@ -24,7 +24,7 @@ class TestAllTogether(unittest.TestCase):
 
         # Assertions
         mock_subprocess.assert_called()  # Ensure subprocess was called
-        self.assertEqual(mock_ask_chatgpt.call_count, 2)  # Ensure the correct number of calls to ask_chatgpt
+        self.assertEqual(mock_ask_chatgpt.call_count, 3)  # Ensure the correct number of calls to ask_chatgpt
 
 #    @patch('alltogether.os.getenv', return_value='fake_api_key')
 #    @patch('alltogether.subprocess.run')
