@@ -2,10 +2,10 @@
 This project aims to interact with the OpenAI ChatGPT model to assist in answering a user question related to a development project. It consists of multiple Python scripts for querying, processing, and interacting with ChatGPT to gather information about the project and provide answers to user questions.
 
 ## Project Files
-- `all-together.py`: Main script that orchestrates the interaction with ChatGPT, runs the questioner and answer modules, and handles the flow of generating questions and prompts.
-- `questioner.py`: Script that generates a meta-question based on the project file structure and creates a prompt to ask ChatGPT which files it needs to examine in order to answer the user question.
-- `answer.py`: Script responsible for constructing the final prompt by compiling information from project files based on the file list provided by `questioner.py`.
-- `requirements.txt`: File listing the project dependencies necessary for running the scripts.
+- `src/questioner/all-together.py`: Main script that orchestrates the interaction with ChatGPT, runs the questioner and answer modules, and handles the flow of generating questions and prompts.
+- `src/questioner/questioner.py`: Script that generates a meta-question based on the project file structure and creates a prompt to ask ChatGPT which files it needs to examine in order to answer the user question.
+- `src/questioner/answer.py`: Script responsible for constructing the final prompt by compiling information from project files based on the file list provided by `questioner.py`.
+- `pyproject.toml`: File listing the project dependencies necessary for running the scripts. Install with `pip install -e .` (or `pip install -e ".[dev]"` for development dependencies).
 
 ## How to Use
 1. Ensure you have the required Python dependencies installed. You can install them using `pip install -r requirements.txt`.

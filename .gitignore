@@ -2,3 +2,4 @@
 __pycache__/
 coverage.xml
 tests/__pycache__/
+src/questioner.egg-info/
