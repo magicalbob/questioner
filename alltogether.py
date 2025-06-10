@@ -57,17 +57,26 @@ def clean_json_response(file_path):
     with open(file_path, 'w') as f:
         f.writelines(lines)
 
+def refine_prompt(question):
+    """Ask ChatGPT to refine the user question."""
+    prompt = "Rewrite the following question to be clearer and more effective. Return only the improved version, as a single sentence. Do not explain or number your answer.\n\nQuestion: '{question}'"
+    return ask_chatgpt(prompt)
+
 def main():
     parser = argparse.ArgumentParser(description="Run questioner and answer modules, and interact with ChatGPT.")
     parser.add_argument('--path', required=True, help='Path to the development project')
     parser.add_argument('--question', required=True, help='The question you want answered')
     args = parser.parse_args()
 
-    # Get the absolute path of the current script
+    # Prompt refinement step
+    refined_question = refine_prompt(args.question)
+    print("Refined Question:")
+    print(refined_question)
+
     script_dir = os.path.dirname(os.path.abspath(__file__))
 
     # Step 1: Run questioner.py to get the meta-question
-    questioner_command = ['python3', os.path.join(script_dir, 'questioner.py'), '--path', args.path, '--question', args.question]
+    questioner_command = ['python3', os.path.join(script_dir, 'questioner.py'), '--path', args.path, '--question', refined_question]
     result = subprocess.run(questioner_command, capture_output=True, text=True)
     meta_question = result.stdout.strip()
 
