@@ -14,7 +14,7 @@ requirements_job:
   script:
     - python3 -m venv /tmp/venv
     - source /tmp/venv/bin/activate
-    - pip install -r requirements.txt
+    - pip install -e .
     - pip freeze
   variables:
     GIT_STRATEGY: clone
